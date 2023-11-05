@@ -18,6 +18,10 @@ const UserSchema = new Schema<UserModel>({
     type: Number,
     default: 0,
   },
+  refreshToken: {
+    type: String,
+    default: '',
+  },
 });
 
 export default model<UserModel>('user', UserSchema);

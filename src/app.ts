@@ -8,14 +8,15 @@ import rollRouter from './routes/rolls';
 import saladRouter from './routes/salads';
 import drinkRouter from './routes/drinks';
 import userRouter from './routes/users';
-import { login } from './controllers/users';
+import { login, verifyCode } from './controllers/users';
 
 const app = express();
 app.use(express.static(DIRECTORY_PATH));
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/login', login);
+app.post('/api/auth/login', login);
+app.post('/api/auth/verify', verifyCode);
 
 app.use('/api', pizzaRouter);
 app.use('/api', rollRouter);
@@ -25,7 +26,7 @@ app.use('/api', userRouter);
 
 app.use((err: ErrorStatusCode, req: Request, res: Response, next: NextFunction) => {
   const { statusCode, message } = err;
-  res.status(statusCode).send({ message: statusCode === 500 ? 'На сервере произошла ошибка' : message });
+  res.status(statusCode).json({ statusCode: `Код ошибки ${statusCode}`, message });
   next();
 });
 

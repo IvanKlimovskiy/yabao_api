@@ -5,4 +5,5 @@ export interface UserModel extends Document {
   img: string;
   number: string;
   code: number;
+  refreshToken: string;
 }
