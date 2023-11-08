@@ -15,7 +15,8 @@ export const getUsers = (req: Request, res: Response, next: NextFunction) =>
   generateController<UserModel>(req, res, next, User, 'find');
 export const login = (req: Request, res: Response, next: NextFunction) => {
   const code = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-  User.findOne(req.body).then((user) => {
+  const { number } = req.body;
+  User.findOne({ number }).then((user) => {
     if (user) {
       User.findOneAndUpdate(req.body, { code }, { new: true })
         .then((user) => {
@@ -24,10 +25,10 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
               code,
             });
           } else {
-            next(new serverSideError('На сервере произошла ошибка'));
+            throw new serverSideError('На сервере произошла ошибка');
           }
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           next(error);
         });
     } else {
@@ -42,7 +43,7 @@ export const login = (req: Request, res: Response, next: NextFunction) => {
             throw new ServerSideError('Пользователь не создан');
           }
         })
-        .catch((error) => {
+        .catch((error: Error) => {
           next(error);
         });
     }
@@ -83,7 +84,37 @@ export const verifyCode = (req: Request, res: Response, next: NextFunction) => {
         throw new NotFoundError('Пользователь не найден');
       }
     })
-    .catch((error) => {
+    .catch((error: Error) => {
       next(error);
     });
+};
+
+export const getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
+  console.log(req.user._id);
+  User.findById(req.user._id).then((user) => {
+    if (user) {
+      res.json({ status: 'success', user });
+    } else {
+      res.json({
+        status: 'failure',
+      });
+    }
+  });
+};
+
+export const logout = (req: Request, res: Response, next: NextFunction) => {
+  const { refreshToken } = req.body;
+  User.findOneAndDelete(refreshToken).then((user) => {
+    if (user) {
+      res.json({
+        status: 'success',
+        message: 'Разлогирование успешное',
+      });
+    } else {
+      res.json({
+        status: 'failure',
+        message: 'Пользователь не найден',
+      });
+    }
+  });
 };

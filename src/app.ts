@@ -8,7 +8,8 @@ import rollRouter from './routes/rolls';
 import saladRouter from './routes/salads';
 import drinkRouter from './routes/drinks';
 import userRouter from './routes/users';
-import { login, verifyCode } from './controllers/users';
+import { getCurrentUser, login, logout, verifyCode } from './controllers/users';
+import auth from './middleware/auth';
 
 const app = express();
 app.use(express.static(DIRECTORY_PATH));
@@ -17,6 +18,7 @@ app.use(express.json());
 
 app.post('/api/auth/login', login);
 app.post('/api/auth/verify', verifyCode);
+app.post('/api/auth/logout', logout);
 
 app.use('/api', pizzaRouter);
 app.use('/api', rollRouter);
@@ -24,6 +26,8 @@ app.use('/api', saladRouter);
 app.use('/api', drinkRouter);
 app.use('/api', userRouter);
 
+app.use(auth);
+app.get('/api/users/me', getCurrentUser);
 app.use((err: ErrorStatusCode, req: Request, res: Response, next: NextFunction) => {
   const { statusCode, message } = err;
   res.status(statusCode).json({ statusCode: `Код ошибки ${statusCode}`, message });
