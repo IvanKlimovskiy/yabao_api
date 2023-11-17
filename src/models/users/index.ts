@@ -18,7 +18,23 @@ const UserSchema = new Schema<UserModel>({
     type: Number,
     default: 0,
   },
+  email: {
+    type: String,
+    default: 'example@email.com',
+  },
+  birthdate: {
+    type: String,
+    default: '',
+  },
+  isActivated: {
+    type: Boolean,
+    default: false,
+  },
   refreshToken: {
+    type: String,
+    default: '',
+  },
+  activationLink: {
     type: String,
     default: '',
   },

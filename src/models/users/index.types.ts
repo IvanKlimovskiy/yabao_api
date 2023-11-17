@@ -5,5 +5,9 @@ export interface UserModel extends Document {
   img: string;
   number: string;
   code: number;
+  email: string;
+  birthdate: string;
+  isActivated: boolean;
   refreshToken: string;
+  activationLink: string;
 }
