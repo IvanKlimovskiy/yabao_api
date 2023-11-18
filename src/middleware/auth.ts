@@ -5,7 +5,6 @@ import UnauthorizedError from '../errors/unauthorized-error';
 
 export default (req: Request, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
-  console.log(authorization);
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return res.send({ status: 'failure' });
   }

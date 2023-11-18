@@ -92,14 +92,13 @@ export const verifyCode = (req: Request, res: Response, next: NextFunction) => {
           }, 3000);
         }
       } else {
-        throw new NotFoundError('Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден или проблема с ключом');
       }
     })
     .catch((error: Error) => {
       next(error);
     });
 };
-
 export const getCurrentUser = (req: Request, res: Response) => {
   User.findById(req.user._id).then((user) => {
     if (user) {
@@ -115,7 +114,6 @@ export const getCurrentUser = (req: Request, res: Response) => {
     }
   });
 };
-
 export const logout = (req: Request, res: Response) => {
   const { refreshToken } = req.body;
   User.findOneAndUpdate({ refreshToken }, { refreshToken: '' }).then((user) => {
@@ -136,52 +134,80 @@ export const logout = (req: Request, res: Response) => {
     }
   });
 };
-
-export const getActivationLink = async (req: Request, res: Response) => {
+export const getActivationLink = async (req: Request, res: Response, next: NextFunction) => {
   const { email, number } = req.body;
-  const user = await User.findOne({ number });
-  if (!user) {
-    throw new NotFoundError('Пользователь не найден');
-  }
-  const activationLink = uuidv4();
-  user.activationLink = activationLink;
-  user.email = email;
-  await MailService.sendActivationLinkToMail(email, `${API_URL}/api/auth/activate/${activationLink}`);
-  await user.save().then(() => {
+  try {
+    const user = await User.findOne({ number });
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    const activationLink = uuidv4();
+    user.activationLink = activationLink;
+    user.email = email;
+    await MailService.sendActivationLinkToMail(email, `${API_URL}api/auth/activate/${activationLink}`);
+    await user.save();
     setTimeout(() => {
       res.json({
         message: 'success',
       });
     }, 3000);
-  });
+  } catch (error: unknown) {
+    next(error);
+  }
 };
-
 export const activateEmail = async (req: Request, res: Response, next: NextFunction) => {
   const activationLink = req.params.link;
-  const user = await User.findOne({ activationLink });
-  if (!user) {
-    next(new NotFoundError('Пользователь не найден'));
-  } else {
+  try {
+    const user = await User.findOne({ activationLink });
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
     user.isActivated = true;
     await user.save().then(() => {
       if (CLIENT_URL) {
         return res.redirect(CLIENT_URL);
       }
     });
+  } catch (err: unknown) {
+    next(err);
   }
 };
-
 export const editName = async (req: Request, res: Response, next: NextFunction) => {
   const { id } = req.params;
   const { name } = req.body;
-  const user = await User.findByIdAndUpdate({ _id: id }, { name }, { new: true });
-  if (!user) {
-    next(new NotFoundError('Пользователь не найден'));
+  try {
+    const user = await User.findByIdAndUpdate({ _id: id }, { name }, { new: true });
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    setTimeout(() => {
+      res.json({
+        status: 'success',
+        user,
+      });
+    }, 3000);
+  } catch (error: unknown) {
+    next(error);
   }
-  setTimeout(() => {
-    res.json({
-      status: 'success',
-      user,
-    });
-  }, 3000);
+};
+
+export const toggleSubscribe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      { _id: req.params.id },
+      { isSubscribed: req.body.isSubscribed },
+      { new: true }
+    );
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    setTimeout(() => {
+      res.json({
+        status: 'success',
+        user,
+      });
+    }, 3000);
+  } catch (error: unknown) {
+    next(error);
+  }
 };

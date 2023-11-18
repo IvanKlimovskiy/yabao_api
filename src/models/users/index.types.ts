@@ -10,4 +10,5 @@ export interface UserModel extends Document {
   isActivated: boolean;
   refreshToken: string;
   activationLink: string;
+  isSubscribed: boolean;
 }

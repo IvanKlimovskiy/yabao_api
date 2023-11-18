@@ -38,6 +38,10 @@ const UserSchema = new Schema<UserModel>({
     type: String,
     default: '',
   },
+  isSubscribed: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 export default model<UserModel>('user', UserSchema);
