@@ -42,6 +42,17 @@ const UserSchema = new Schema<UserModel>({
     type: Boolean,
     default: true,
   },
+  cart: [
+    {
+      _id: { type: Schema.ObjectId },
+      name: { type: String },
+      img: { type: String },
+      price: { type: Number },
+      amount: { type: Number },
+      description: { type: String },
+      isNewProduct: { type: Boolean },
+    },
+  ],
 });
 
 export default model<UserModel>('user', UserSchema);
